@@ -6,6 +6,10 @@ Ele checa sozinho às 12h e às 19h (horário de Brasília) e ainda responde a u
 
 Nada sensível mora no repositório: token, chat id e nome ficam só no seu `.env`, que o git ignora.
 
+**O que você vai precisar:** uma conta no Telegram e Docker **ou** Python 3.10+. O resto está aqui embaixo.
+
+**Atalhos:** [criar o bot](#1-criando-o-bot-no-telegram) · [configurar](#2-configurando) · [Docker](#3-rodando-com-docker-recomendado) · [Python](#4-rodando-direto-com-python) · [testes](#5-testando) · [comandos](#6-comandos-no-telegram)
+
 ## 1. Criando o bot no Telegram
 
 1. Abra o Telegram e procure por **@BotFather** (o oficial, com selo azul).
@@ -61,6 +65,8 @@ docker compose logs -f
 O container roda em modo daemon: faz uma checagem ao subir, outras duas por dia e fica ouvindo seus comandos. O banco de dados fica na pasta `./state`, então reiniciar o container não faz o bot reler tudo do zero.
 
 Pra parar: `docker compose down`. Pra atualizar: `git pull && docker compose up -d --build`.
+
+> **Primeira execução:** o bot lê as edições da página inicial do site de uma vez (umas 50), então pode demorar alguns minutinhos e já chegar uma mensagem de "verificação concluída" no Telegram. Depois disso ele só olha o que for novo. Se quiser testar antes sem registrar nada, use os testes da seção 5.
 
 ## 4. Rodando direto com Python
 
@@ -141,10 +147,3 @@ Mensagens de qualquer outro chat são ignoradas.
 Quando não tem novidade, o bot manda uma mensagem verde de "verificação concluída" com a última edição vista. Se der erro de download ou leitura, ele avisa. Se a numeração das edições pular, ele também avisa de uma possível lacuna.
 
 Se os logs começarem a mostrar número ou data como `None`, o site da prefeitura provavelmente mudou o HTML e o parsing de `listar_edicoes()` precisa de um ajuste.
-
-## 8. Cuidados com segredos
-
-- Nunca coloque token, chat id ou nome em arquivo versionado.
-- Os logs mascaram o token do Telegram automaticamente.
-- Antes de commitar, olhe o `git status`: `.env` e `*.db` não podem aparecer.
-- Se um token já foi commitado um dia, revogue no BotFather. Apagar o arquivo não tira do histórico.
