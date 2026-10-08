@@ -4,7 +4,7 @@ Um bot que fica de olho no [Boletim Oficial de Angra](https://angra.rj.gov.br/bo
 
 Ele checa sozinho às 12h e às 19h (horário de Brasília) e ainda responde a uns comandos no chat, tipo `/status` e `/verificar`.
 
-Nada sensível mora no repositório: token, chat id e nome ficam só no seu `.env`, que o git ignora. Por isso dá pra deixar o repo público tranquilo.
+Nada sensível mora no repositório: token, chat id e nome ficam só no seu `.env`, que o git ignora.
 
 ## 1. Criando o bot no Telegram
 
