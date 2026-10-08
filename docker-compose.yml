@@ -1,0 +1,13 @@
+services:
+  monitor:
+    build: .
+    container_name: monitor_boletim_angra
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./state:/app/state
+      - ./config.json:/app/config.json:ro
+    environment:
+      - TZ=America/Sao_Paulo
+      - PYTHONUNBUFFERED=1

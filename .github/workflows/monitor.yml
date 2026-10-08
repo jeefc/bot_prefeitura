@@ -1,0 +1,69 @@
+name: Monitor Boletim Oficial Angra
+
+on:
+  schedule:
+    - cron: '0 15 * * *'   # 12:00 BRT (UTC-3)
+    - cron: '0 22 * * *'   # 19:00 BRT (UTC-3)
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: 'Quantidade de edições recentes a reprocessar (0 = normal)'
+        required: false
+        default: '0'
+      test:
+        description: 'Modo teste (não grava estado)?'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Restaurar estado (cache)
+        id: cache-estado
+        uses: actions/cache/restore@v4
+        with:
+          path: state/boletins.db
+          key: estado-boletins-${{ github.run_id }}
+          restore-keys: |
+            estado-boletins-
+
+      - name: Rodar monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOME_BUSCA: ${{ secrets.NOME_BUSCA }}
+          BACKFILL: ${{ github.event.inputs.backfill }}
+          TEST_MODE: ${{ github.event.inputs.test }}
+        run: |
+          ARGS=""
+          if [ -n "$BACKFILL" ] && [ "$BACKFILL" != "0" ]; then
+            ARGS="$ARGS --backfill $BACKFILL"
+          fi
+          if [ "$TEST_MODE" == "true" ]; then
+            ARGS="$ARGS --test"
+          fi
+          python monitor.py $ARGS
+
+      - name: Salvar estado (cache, só fora do modo teste)
+        if: ${{ always() && github.event.inputs.test != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: state/boletins.db
+          key: estado-boletins-${{ github.run_id }}
+
